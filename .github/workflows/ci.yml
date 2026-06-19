@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    paths: ["Formula/**"]
+  pull_request:
+    paths: ["Formula/**"]
+
+jobs:
+  whisper:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Cache Homebrew downloads (models + server binary)
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew/downloads
+          key: homebrew-downloads-1fc70f77-2aa269b7
+
+      - run: brew tap ${{ github.repository_owner }}/tap "$GITHUB_WORKSPACE"
+      - run: brew style Formula/
+
+      - run: brew audit ${{ github.repository_owner }}/tap/whisper-cpp-silero-vad
+      - run: brew install ${{ github.repository_owner }}/tap/whisper-cpp-silero-vad
+      - run: brew test whisper-cpp-silero-vad
+
+      - run: brew audit ${{ github.repository_owner }}/tap/whisper-cpp-large-v3-turbo
+      - run: brew install ${{ github.repository_owner }}/tap/whisper-cpp-large-v3-turbo
+      - run: brew test whisper-cpp-large-v3-turbo
+
+      - run: brew audit ${{ github.repository_owner }}/tap/whisper-cpp-server
+      - run: brew install ${{ github.repository_owner }}/tap/whisper-cpp-server
+      - run: brew test whisper-cpp-server
+      - run: brew linkage whisper-cpp-server
+
+  rune:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@main
+
+      - run: brew tap ${{ github.repository_owner }}/tap "$GITHUB_WORKSPACE"
+      - run: brew style Formula/rune.rb
+      - run: brew audit ${{ github.repository_owner }}/tap/rune
+      # Install and test require the sha256 in Formula/rune.rb to match the
+      # published release asset. Uncomment after updating sha256 from the
+      # rune release workflow's Summary tab:
+      # - run: brew install ${{ github.repository_owner }}/tap/rune
+      # - run: brew test rune
+      # - run: brew linkage rune
