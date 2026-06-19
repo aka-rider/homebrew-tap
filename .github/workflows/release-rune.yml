@@ -1,0 +1,43 @@
+name: Release Rune Formula
+
+on:
+  workflow_dispatch:
+    inputs:
+      rune_version:
+        description: "rune version tag (e.g. v0.1.0)"
+        required: true
+
+jobs:
+  bump:
+    runs-on: macos-15
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute sha256
+        run: |
+          VERSION="${{ github.event.inputs.rune_version }}"
+          URL="https://github.com/aka-rider/rune/releases/download/${VERSION}/rune-darwin-arm64.tar.gz"
+          SHA256=$(curl -fsSL "$URL" | shasum -a 256 | awk '{print $1}')
+          [ -n "$SHA256" ] || { echo "sha256 computation failed — is ${URL} reachable?"; exit 1; }
+          echo "SHA256=$SHA256" >> "$GITHUB_ENV"
+          echo "VERSION_BARE=${VERSION#v}" >> "$GITHUB_ENV"
+
+      - name: Update Formula/rune.rb
+        run: |
+          sed -i '' \
+            -e "s/version \".*\"/version \"${VERSION_BARE}\"/" \
+            -e "s/sha256 \"[0-9a-f]*\"/sha256 \"${SHA256}\"/" \
+            Formula/rune.rb
+          echo "=== Formula/rune.rb ==="
+          grep -E 'version|sha256' Formula/rune.rb
+
+      - name: Commit and push
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add Formula/rune.rb
+          git commit -m "bump(rune): ${VERSION_BARE}"
+          git push

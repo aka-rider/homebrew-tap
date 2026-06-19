@@ -1,0 +1,103 @@
+name: Release Whisper
+
+on:
+  workflow_dispatch:
+    inputs:
+      whisper_version:
+        description: "whisper.cpp version tag (e.g. v1.8.5)"
+        required: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Install build tools
+        run: brew install cmake ninja libomp
+
+      - name: Fetch whisper.cpp source and compute sha256
+        run: |
+          VERSION="${{ github.event.inputs.whisper_version }}"
+          curl -fsSL \
+            "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/${VERSION}.tar.gz" \
+            -o "whisper-src.tar.gz"
+          SOURCE_SHA256=$(shasum -a 256 whisper-src.tar.gz | awk '{print $1}')
+          echo "SOURCE_SHA256=$SOURCE_SHA256" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "VERSION_BARE=${VERSION#v}" >> "$GITHUB_ENV"
+          tar xz --strip-components=1 -f whisper-src.tar.gz
+          rm whisper-src.tar.gz
+
+      - name: Build whisper-server
+        env:
+          OpenMP_ROOT: /opt/homebrew/opt/libomp
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DGGML_ACCELERATE=ON \
+            -DGGML_BLAS=ON \
+            -DGGML_BLAS_VENDOR=Apple \
+            -DGGML_NATIVE=OFF \
+            -DGGML_OPENMP=ON \
+            -DGGML_METAL=ON \
+            -DWHISPER_COREML=ON \
+            -DWHISPER_SDL2=OFF \
+            -DWHISPER_BUILD_TESTS=OFF \
+            -DWHISPER_BUILD_EXAMPLES=ON
+          cmake --build build --config Release
+
+      - name: Fix libomp rpath and sign
+        run: |
+          install_name_tool -change \
+            @rpath/libomp.dylib \
+            /opt/homebrew/opt/libomp/lib/libomp.dylib \
+            build/bin/whisper-server
+          codesign --sign - --force build/bin/whisper-server
+
+      - name: Package and compute sha256
+        run: |
+          mkdir release
+          cp build/bin/whisper-server release/
+          tar czf "release/whisper-server-${VERSION}-arm64.tar.gz" -C release whisper-server
+          BINARY_SHA256=$(shasum -a 256 "release/whisper-server-${VERSION}-arm64.tar.gz" | awk '{print $1}')
+          echo "BINARY_SHA256=$BINARY_SHA256" >> "$GITHUB_ENV"
+
+      - name: Upload binary to GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.event.inputs.whisper_version }}
+          name: "whisper-server ${{ github.event.inputs.whisper_version }}"
+          files: release/whisper-server-*-arm64.tar.gz
+
+      - name: Update formulas
+        run: |
+          # whisper-cpp-large-v3-turbo.rb: bump source tarball sha256
+          sed -i '' \
+            -e "s|archive/refs/tags/v[^/]*.tar.gz|archive/refs/tags/${VERSION}.tar.gz|" \
+            -e "s/sha256 \"[0-9a-f]*\"/sha256 \"${SOURCE_SHA256}\"/" \
+            Formula/whisper-cpp-large-v3-turbo.rb
+
+          # whisper-cpp-server.rb: bump binary URL version and sha256
+          sed -i '' \
+            -e "s|releases/download/v[^/]*/whisper-server-v[^/]*-arm64|releases/download/${VERSION}/whisper-server-${VERSION}-arm64|" \
+            -e "s/sha256 \"[0-9a-f]*\"/sha256 \"${BINARY_SHA256}\"/" \
+            Formula/whisper-cpp-server.rb
+
+          echo "=== whisper-cpp-large-v3-turbo.rb ==="
+          grep -E 'url|sha256' Formula/whisper-cpp-large-v3-turbo.rb | head -4
+          echo "=== whisper-cpp-server.rb ==="
+          grep -E 'url|sha256' Formula/whisper-cpp-server.rb | head -4
+
+      - name: Commit and push formula updates
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add Formula/whisper-cpp-large-v3-turbo.rb Formula/whisper-cpp-server.rb
+          git commit -m "bump(whisper): ${VERSION_BARE}"
+          git push

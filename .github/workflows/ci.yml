@@ -44,9 +44,6 @@ jobs:
 
       - run: brew style Formula/rune.rb
       - run: brew audit ${{ github.repository_owner }}/tap/rune
-      # Install and test require the sha256 in Formula/rune.rb to match the
-      # published release asset. Uncomment after updating sha256 from the
-      # rune release workflow's Summary tab:
-      # - run: brew install ${{ github.repository_owner }}/tap/rune
-      # - run: brew test rune
-      # - run: brew linkage rune
+      - run: brew install ${{ github.repository_owner }}/tap/rune
+      - run: brew test rune
+      - run: brew linkage rune
