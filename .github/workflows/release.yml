@@ -1,12 +1,8 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      whisper_version:
-        description: "whisper.cpp version tag (e.g. v1.8.5)"
-        required: true
-        default: "v1.8.5"
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -20,7 +16,7 @@ jobs:
 
       - name: Fetch whisper.cpp source
         run: |
-          VERSION="${{ github.event.inputs.whisper_version }}"
+          VERSION="${{ github.event.release.tag_name }}"
           curl -fsSL "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/${VERSION}.tar.gz" \
             | tar xz --strip-components=1
 
@@ -53,17 +49,14 @@ jobs:
 
       - name: Package
         run: |
-          VERSION="${{ github.event.inputs.whisper_version }}"
+          VERSION="${{ github.event.release.tag_name }}"
           mkdir release
           cp build/bin/whisper-server release/
           tar czf "release/whisper-server-${VERSION}-arm64.tar.gz" -C release whisper-server
           echo "=== UPDATE Formula/whisper-cpp-server.rb sha256 to: ==="
           shasum -a 256 "release/whisper-server-${VERSION}-arm64.tar.gz"
 
-      - name: Publish GitHub Release
+      - name: Upload binary to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.whisper_version }}
-          name: "whisper-server ${{ github.event.inputs.whisper_version }}"
           files: release/whisper-server-*-arm64.tar.gz
-          create_release: true
