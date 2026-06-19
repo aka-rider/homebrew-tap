@@ -32,6 +32,7 @@ class WhisperCppServer < Formula
     <<~CONF
       WHISPER_VAD_MODEL=#{vad_model}/models/ggml-silero-v6.2.0.bin
       WHISPER_HOST=127.0.0.1
+      WHISPER_PORT=8080
       WHISPER_THREADS=6
       WHISPER_VAD_THRESHOLD=0.5
       WHISPER_VAD_MIN_SPEECH_MS=200
@@ -53,6 +54,7 @@ class WhisperCppServer < Formula
         --vad-min-speech-duration-ms "${WHISPER_VAD_MIN_SPEECH_MS:-200}" \\
         --vad-min-silence-duration-ms "${WHISPER_VAD_MIN_SILENCE_MS:-500}" \\
         --host "${WHISPER_HOST:-127.0.0.1}" \\
+        --port "${WHISPER_PORT:-8080}" \\
         "$@"
     SH
   end
