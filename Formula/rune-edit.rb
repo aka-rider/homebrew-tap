@@ -14,8 +14,6 @@ class RuneEdit < Formula
     disable! date: "2026-06-18", because: "pre-built binary is Apple Silicon (arm64) only"
   end
 
-  depends_on "libgit2"  # runtime: binary dynamically links libgit2.dylib
-
   def install
     bin.install "rune"
   end
