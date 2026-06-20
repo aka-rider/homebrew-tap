@@ -11,7 +11,7 @@ brew tap aka-rider/tap
 ### rune — TUI markdown editor
 
 ```sh
-brew install aka-rider/tap/rune
+brew install aka-rider/tap/rune-edit
 rune --version
 ```
 
@@ -56,7 +56,7 @@ $(brew --prefix)/etc/whisper-cpp-server/config
 
 | Formula | Description |
 |---------|-------------|
-| `rune` | TUI markdown editor (pre-built arm64 binary) |
+| `rune-edit` | TUI markdown editor (pre-built arm64 binary) |
 | `whisper-cpp-server` | OpenAI Whisper HTTP server with VAD and Metal acceleration (pre-built arm64 binary) |
 | `whisper-cpp-large-v3-turbo` | Whisper large-v3-turbo GGML model |
 | `whisper-cpp-silero-vad` | Silero VAD GGML model |

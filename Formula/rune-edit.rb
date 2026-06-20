@@ -1,4 +1,4 @@
-class Rune < Formula
+class RuneEdit < Formula
   desc "TUI markdown editor and note-taking app"
   homepage "https://github.com/aka-rider/rune"
   version "1.0.0"
