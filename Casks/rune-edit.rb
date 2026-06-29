@@ -20,6 +20,10 @@ cask "rune-edit" do
 
   binary "rune"
 
-  # No zap stanza required
+  postflight do
+    if OS.mac?
+      system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rune"]
+    end
+  end
 
 end
