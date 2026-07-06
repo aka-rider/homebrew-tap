@@ -3,8 +3,9 @@ cask "leash" do
   version "1.0.0"
 
   on_macos do
-    sha256 "f295cd8372c0cfa5123a2223f15f085188a5bca9e1ec05246e8585437960a28d"
-    url "https://github.com/aka-rider/leash/releases/download/v#{version}/leash_#{version}_darwin_universal.tar.gz"
+    sha256 "8001e29114f03b9726afce14ed9dfe024d78d972115f98143785ef1bc8edee63"
+    url "https://github.com/aka-rider/leash/releases/download/v#{version}/leash_#{version}_darwin_universal.tar.gz",
+        verified: "github.com/aka-rider/leash"
   end
 
   name "leash"
@@ -17,6 +18,12 @@ cask "leash" do
 
   binary "leash"
   binary "leash-trace"
+
+  postflight do
+    if OS.mac?
+      system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}"]
+    end
+  end
 
   # No zap stanza required
 
