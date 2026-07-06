@@ -57,6 +57,7 @@ class WhisperCppLargeV3Turbo < Formula
         --with 'ane-transformers' \
         --with 'openai-whisper' \
         --with 'torch' \
+        --with 'numpy<2' \
         "#{opt_libexec}/scripts/convert-whisper-to-coreml.py" \
         --model large-v3-turbo --encoder-only True --optimize-ane True \
       || {
