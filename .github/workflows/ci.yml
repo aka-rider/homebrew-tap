@@ -42,8 +42,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: Homebrew/actions/setup-homebrew@main
 
-      - run: brew style Formula/rune-edit.rb
-      - run: brew audit ${{ github.repository_owner }}/tap/rune-edit
-      - run: brew install ${{ github.repository_owner }}/tap/rune-edit
-      - run: brew test rune-edit
-      - run: brew linkage rune-edit
+      - run: brew style Casks/rune-edit.rb
+      - run: brew audit --cask ${{ github.repository_owner }}/tap/rune-edit
+      - run: brew install --cask ${{ github.repository_owner }}/tap/rune-edit

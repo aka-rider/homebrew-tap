@@ -44,7 +44,7 @@ class WhisperCppServer < Formula
     <<~SH
       #!/bin/sh
       . "#{etc}/whisper-cpp-server/config" 2>/dev/null || true
-      "#{Formula["aka-rider/tap/whisper-cpp-large-v3-turbo"].opt_bin}/whisper-cpp-model-manager" || exit 1
+      "#{formula_opt_bin("aka-rider/tap/whisper-cpp-large-v3-turbo")}/whisper-cpp-model-manager" || exit 1
       exec "#{opt_bin}/whisper-server" \\
         -m "#{var}/whisper-cpp-server/models/ggml-large-v3-turbo.bin" \\
         -t "${WHISPER_THREADS:-6}" -fa \\
