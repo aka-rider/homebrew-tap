@@ -3,7 +3,7 @@ class WhisperCppServer < Formula
   homepage "https://github.com/ggml-org/whisper.cpp"
   # sha256 is populated after running release.yml — update before first install
   url "https://github.com/aka-rider/homebrew-tap/releases/download/v1.8.5/whisper-server-v1.8.5-arm64.tar.gz"
-  sha256 "aac9eec25fd89787693782012bb00946efe6f52c1a7d52e852f3f72f947925e1"
+  sha256 "4e680c97c51c2198d145cb2aa9d82f2ba3564a6532938368e8446c3ca86c47f6"
   license "MIT"
 
   # Pre-built for Apple Silicon only.
