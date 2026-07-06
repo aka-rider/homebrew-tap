@@ -5,8 +5,7 @@ cask "rune-edit" do
   on_macos do
     on_arm do
       sha256 "76c70f3696cffa3de203f4707990837b405e6322d18b3e4eff85138cf3ffc90c"
-      url "https://github.com/aka-rider/rune/releases/download/v#{version}/rune-darwin-arm64.tar.gz",
-          verified: "github.com/aka-rider/rune"
+      url "https://github.com/aka-rider/rune/releases/download/v#{version}/rune-darwin-arm64.tar.gz"
     end
   end
 

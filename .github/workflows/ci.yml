@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    paths: ["Formula/**"]
+    paths: ["Formula/**", "Casks/**"]
   pull_request:
-    paths: ["Formula/**"]
+    paths: ["Formula/**", "Casks/**"]
 
 jobs:
   whisper:
