@@ -6,6 +6,7 @@ class WhisperCppLargeV3Turbo < Formula
   license "MIT"
 
   depends_on "uv"
+  depends_on :xcode
 
   on_intel do
     disable! date: "2026-06-18", because: "ANE requires Apple Silicon"
@@ -90,6 +91,9 @@ class WhisperCppLargeV3Turbo < Formula
       First launch downloads ~3 GB and builds the CoreML encoder (~5-10 min):
         ~1.5 GB  ggml-large-v3-turbo.bin   (HuggingFace)
         ~1.6 GB  large-v3-turbo.pt          (OpenAI CDN, cached at ~/.cache/whisper/)
+
+      Requires full Xcode (not just Command Line Tools) — `xcrun coremlc`, used to
+      compile the CoreML encoder, ships only with Xcode.app.
 
       After first launch completes, subsequent launches are instant.
       The .pt file (~1.6 GB) is no longer needed after conversion:
