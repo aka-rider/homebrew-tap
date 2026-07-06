@@ -6,7 +6,7 @@ cask "rune-edit" do
     on_arm do
       sha256 "76c70f3696cffa3de203f4707990837b405e6322d18b3e4eff85138cf3ffc90c"
       url "https://github.com/aka-rider/rune/releases/download/v#{version}/rune-darwin-arm64.tar.gz",
-        verified: "github.com/aka-rider/rune"
+          verified: "github.com/aka-rider/rune"
     end
   end
 
@@ -21,11 +21,8 @@ cask "rune-edit" do
   binary "rune"
 
   postflight do
-    if OS.mac?
-      system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rune"]
-    end
+    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rune"] if OS.mac?
   end
 
   # No zap stanza required
-
 end
