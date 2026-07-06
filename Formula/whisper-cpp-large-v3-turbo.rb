@@ -52,12 +52,13 @@ class WhisperCppLargeV3Turbo < Formula
       # The conversion script writes to models/coreml-encoder-<model>.mlpackage relative to CWD.
       # We cd one level above MODEL_DIR so that "models/" prefix resolves to MODEL_DIR itself.
       cd "$(dirname "$MODEL_DIR")"
-      "#{formula_opt_bin("uv")}/uv" run --isolated \
+      "#{formula_opt_bin("uv")}/uv" run --isolated --python 3.11 \
         --with 'coremltools==7.2' \
         --with 'ane-transformers' \
         --with 'openai-whisper' \
-        --with 'torch' \
+        --with 'torch==2.2.0' \
         --with 'numpy<2' \
+        --with 'setuptools' \
         "#{opt_libexec}/scripts/convert-whisper-to-coreml.py" \
         --model large-v3-turbo --encoder-only True --optimize-ane True \
       || {
