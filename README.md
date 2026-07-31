@@ -14,6 +14,14 @@ Casks and formulas below are given as `brew install aka-rider/tap/<name>`, which
 install more than one item from this tap), the unqualified `brew install --cask <name>` /
 `brew install <name>` also works.
 
+Recent Homebrew versions require non-official taps to be trusted before their formulae or casks
+are loaded (`HOMEBREW_REQUIRE_TAP_TRUST`, on by default). If `brew install` refuses to load
+anything from this tap, run:
+
+```sh
+brew trust aka-rider/tap
+```
+
 ### rune — TUI markdown editor
 
 ```sh
