@@ -4,12 +4,13 @@ cask "leash" do
 
   on_macos do
     sha256 "8001e29114f03b9726afce14ed9dfe024d78d972115f98143785ef1bc8edee63"
+
     url "https://github.com/aka-rider/leash/releases/download/v#{version}/leash_#{version}_darwin_universal.tar.gz",
         verified: "github.com/aka-rider/leash"
   end
 
   name "leash"
-  desc "Transparent macOS seatbelt sandbox for any command"
+  desc "Transparent seatbelt sandbox for any command"
   homepage "https://github.com/aka-rider/leash"
 
   livecheck do
@@ -20,11 +21,8 @@ cask "leash" do
   binary "leash-trace"
 
   postflight do
-    if OS.mac?
-      system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}"]
-    end
+    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", staged_path.to_s] if OS.mac?
   end
 
   # No zap stanza required
-
 end
