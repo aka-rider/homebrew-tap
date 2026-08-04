@@ -5,6 +5,11 @@ on:
     paths: ["Formula/**", "Casks/**"]
   pull_request:
     paths: ["Formula/**", "Casks/**"]
+  # release-vuho.yml pushes cask bumps unattended, so this audit is the only
+  # review those commits get. Make it runnable on demand too: a dropped or
+  # filtered push event would otherwise leave a published cask unaudited with
+  # no way to check it short of an empty commit.
+  workflow_dispatch:
 
 jobs:
   whisper:
