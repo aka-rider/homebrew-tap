@@ -1,0 +1,95 @@
+name: Release Vuho Cask
+
+# Publishing a vuho release must publish the cask, with no human step in
+# between. GitHub has no cross-repo trigger, so aka-rider/vuho's release.yml
+# fires a repository_dispatch here using a PAT it stores as HOMEBREW_TAP_TOKEN;
+# from that point on this workflow uses the tap's own GITHUB_TOKEN, exactly
+# like release-rune.yml.
+#
+# The sha256 is recomputed here from the *published* asset rather than trusted
+# from the dispatch payload: this is the tap asserting that what users will
+# actually download matches what the cask declares, which is the whole point
+# of the checksum. A payload-supplied hash could only ever restate what the
+# builder already believed.
+on:
+  repository_dispatch:
+    types: [vuho-release]
+  # Manual fallback: re-bump by hand if the dispatch never arrived (PAT
+  # missing, expired, or revoked) or to re-pin an older version.
+  workflow_dispatch:
+    inputs:
+      vuho_version:
+        description: "vuho version tag (e.g. v0.9.0)"
+        required: true
+
+jobs:
+  bump:
+    runs-on: macos-15
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version and compute sha256
+        # Both values arrive through env rather than `${{ }}` interpolated
+        # into the script body: client_payload is event data, and splicing it
+        # straight into a shell line is a command-injection sink.
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.vuho_version }}
+          PAYLOAD_VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          VERSION="${INPUT_VERSION:-${PAYLOAD_VERSION:-}}"
+          VERSION="${VERSION#v}"
+
+          # Validate the shape before it reaches a URL or the cask file. vuho's
+          # own release.yml already gates its tags this way; re-checking here
+          # keeps this workflow correct on the manual-dispatch path too, where
+          # a human types the version.
+          if ! [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$VERSION' is not a MAJOR.MINOR.PATCH version (expected e.g. 0.9.0)"
+            exit 1
+          fi
+
+          URL="https://github.com/aka-rider/vuho/releases/download/v${VERSION}/Vuho-${VERSION}-arm64.tar.gz"
+          echo "Asset: $URL"
+          SHA256="$(curl -fsSL "$URL" | shasum -a 256 | awk '{print $1}')"
+          [ -n "$SHA256" ] || { echo "::error::sha256 computation failed — is ${URL} reachable?"; exit 1; }
+
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "SHA256=$SHA256" >> "$GITHUB_ENV"
+
+      - name: Update Casks/vuho.rb
+        run: |
+          set -euo pipefail
+          sed -i '' \
+            -e "s/version \".*\"/version \"${VERSION}\"/" \
+            -e "s/sha256 \"[0-9a-f]*\"/sha256 \"${SHA256}\"/" \
+            Casks/vuho.rb
+          echo "=== Casks/vuho.rb ==="
+          grep -E 'version|sha256' Casks/vuho.rb
+
+          # A sed that matched nothing leaves the file untouched and exits 0,
+          # which would otherwise publish a silently stale cask.
+          grep -q "version \"${VERSION}\"" Casks/vuho.rb || { echo "::error::version substitution did not apply"; exit 1; }
+          grep -q "sha256 \"${SHA256}\"" Casks/vuho.rb || { echo "::error::sha256 substitution did not apply"; exit 1; }
+
+      - name: Commit and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "Casks/vuho.rb already at ${VERSION} / ${SHA256} — nothing to do."
+            exit 0
+          fi
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git add Casks/vuho.rb
+          # Deliberately no [skip ci]: this push is exactly when ci.yml's
+          # `brew audit --cask` / `brew install --cask` should run, since an
+          # unattended bump is the case with no human reviewing the result.
+          git commit -m "bump(vuho): ${VERSION}"
+          git push origin HEAD

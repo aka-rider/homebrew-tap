@@ -45,3 +45,32 @@ jobs:
       - run: brew style Casks/rune-edit.rb
       - run: brew audit --cask ${{ github.repository_owner }}/tap/rune-edit
       - run: brew install --cask ${{ github.repository_owner }}/tap/rune-edit
+
+  # release-vuho.yml commits cask bumps unattended, without [skip ci] — this
+  # job is the review that no human is doing on those commits.
+  vuho:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@main
+
+      - run: brew style Casks/vuho.rb
+      - run: brew audit --cask ${{ github.repository_owner }}/tap/vuho
+      - run: brew install --cask ${{ github.repository_owner }}/tap/vuho
+
+      # `brew install --cask` succeeding only proves the download hashed and
+      # unpacked. Assert the app actually landed, and that its version is the
+      # one the cask claims — a tarball built from the wrong tag would install
+      # cleanly and still be the wrong app.
+      - name: Verify installed app matches cask version
+        run: |
+          set -euo pipefail
+          APP="/Applications/Vuho.app"
+          [[ -d "$APP" ]] || { echo "::error::$APP not installed"; exit 1; }
+          CASK_VERSION="$(brew info --cask --json=v2 ${{ github.repository_owner }}/tap/vuho | \
+            python3 -c "import json,sys; print(json.load(sys.stdin)['casks'][0]['version'])")"
+          APP_VERSION="$(plutil -extract CFBundleShortVersionString raw "$APP/Contents/Info.plist")"
+          echo "cask=$CASK_VERSION app=$APP_VERSION"
+          [[ "$CASK_VERSION" == "$APP_VERSION" ]] || \
+            { echo "::error::installed app version ($APP_VERSION) != cask version ($CASK_VERSION)"; exit 1; }
