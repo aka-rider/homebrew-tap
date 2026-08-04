@@ -2,11 +2,11 @@
 # `sha256` lines are rewritten on every aka-rider/vuho release. Edit anything
 # else here freely; those two are machine-owned.
 cask "vuho" do
-  version "0.9.0"
+  version "0.9.1"
 
   on_macos do
     on_arm do
-      sha256 "8a21d4c0cd8e20655ace31dfa22ed163777b03288e9c1abc7735e547c9be7b94"
+      sha256 "3f86c02f3016c300ca2207ba9043ccc36bcfd5505063629ea32d62f9bdd43cea"
       url "https://github.com/aka-rider/vuho/releases/download/v#{version}/Vuho-#{version}-arm64.tar.gz",
           verified: "github.com/aka-rider/vuho"
     end
