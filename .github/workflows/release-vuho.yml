@@ -30,6 +30,7 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@main
 
       - name: Resolve version and compute sha256
         # Both values arrive through env rather than `${{ }}` interpolated
@@ -75,6 +76,37 @@ jobs:
           grep -q "version \"${VERSION}\"" Casks/vuho.rb || { echo "::error::version substitution did not apply"; exit 1; }
           grep -q "sha256 \"${SHA256}\"" Casks/vuho.rb || { echo "::error::sha256 substitution did not apply"; exit 1; }
 
+      # Audit BEFORE publishing, not after. ci.yml cannot cover this path: a
+      # push made with the default GITHUB_TOKEN never triggers another
+      # workflow (GitHub's recursion prevention), so the bump commit below
+      # will not start a CI run no matter what its message says. Verifying
+      # here is also simply better — a cask that fails audit is never pushed,
+      # rather than pushed and then reported broken.
+      #
+      # Symlinking the checkout into Homebrew's tap directory makes
+      # `aka-rider/tap/vuho` resolve to the *edited* file: `brew audit` and
+      # `brew install` only accept a tapped name, never a path.
+      - name: Verify cask before publishing
+        run: |
+          set -euo pipefail
+          TAP_DIR="$(brew --repository)/Library/Taps/aka-rider/homebrew-tap"
+          mkdir -p "$(dirname "$TAP_DIR")"
+          rm -rf "$TAP_DIR"
+          ln -s "$GITHUB_WORKSPACE" "$TAP_DIR"
+
+          brew style Casks/vuho.rb
+          brew audit --cask aka-rider/tap/vuho
+          brew install --cask aka-rider/tap/vuho
+
+          # Installing cleanly only proves the tarball hashed and unpacked.
+          # Assert it holds the app this cask claims a version for.
+          APP="/Applications/Vuho.app"
+          [[ -d "$APP" ]] || { echo "::error::$APP not installed"; exit 1; }
+          APP_VERSION="$(plutil -extract CFBundleShortVersionString raw "$APP/Contents/Info.plist")"
+          echo "cask=${VERSION} app=${APP_VERSION}"
+          [[ "$APP_VERSION" == "$VERSION" ]] || \
+            { echo "::error::installed app version ($APP_VERSION) != cask version ($VERSION)"; exit 1; }
+
       - name: Commit and push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,8 +120,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git add Casks/vuho.rb
-          # Deliberately no [skip ci]: this push is exactly when ci.yml's
-          # `brew audit --cask` / `brew install --cask` should run, since an
-          # unattended bump is the case with no human reviewing the result.
           git commit -m "bump(vuho): ${VERSION}"
           git push origin HEAD
