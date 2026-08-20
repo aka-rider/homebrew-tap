@@ -1,10 +1,10 @@
 class Rune < Formula
   desc "TUI markdown editor that protects your words"
   homepage "https://github.com/aka-rider/rune"
-  version "1.2.0"
+  version "1.3.0"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/aka-rider/rune/releases/download/v1.2.0/rune-cli-aarch64-apple-darwin.tar.xz"
-    sha256 "15c5d642a8c3aeced5f981e923a18b6d36787d4416614379b21f73c19ed00edc"
+    url "https://github.com/aka-rider/rune/releases/download/v1.3.0/rune-cli-aarch64-apple-darwin.tar.xz"
+    sha256 "6f67df64b5850e3763053114ad2a4cb665384e0133eb3d17380d486c31c2e02b"
   end
   license "MIT"
 
@@ -28,7 +28,9 @@ class Rune < Formula
   end
 
   def install
-    bin.install "rune" if OS.mac? && Hardware::CPU.arm?
+    if OS.mac? && Hardware::CPU.arm?
+      bin.install "rune"
+    end
 
     install_binary_aliases!
 
