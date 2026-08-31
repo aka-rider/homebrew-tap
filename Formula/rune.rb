@@ -1,15 +1,27 @@
 class Rune < Formula
   desc "TUI markdown editor that protects your words"
   homepage "https://github.com/aka-rider/rune"
-  version "1.3.0"
+  version "1.4.0"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/aka-rider/rune/releases/download/v1.3.0/rune-cli-aarch64-apple-darwin.tar.xz"
-    sha256 "6f67df64b5850e3763053114ad2a4cb665384e0133eb3d17380d486c31c2e02b"
+    url "https://github.com/aka-rider/rune/releases/download/v1.4.0/rune-cli-aarch64-apple-darwin.tar.xz"
+    sha256 "626de2de860cf04af6da158080fdc85ad374ff67977608cb704c13b0e2039ca7"
+  end
+  if OS.linux?
+    if Hardware::CPU.arm?
+      url "https://github.com/aka-rider/rune/releases/download/v1.4.0/rune-cli-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "ef8c2a8f87a643b2dbafe1ec8a53cb5bb4408025f67abe7b2a45240d9fe41268"
+    end
+    if Hardware::CPU.intel?
+      url "https://github.com/aka-rider/rune/releases/download/v1.4.0/rune-cli-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "e29b7dc78a7195fbdfab5f38c73cae38ff4c6ba28fe8253157d077451da30684"
+    end
   end
   license "MIT"
 
   BINARY_ALIASES = {
-    "aarch64-apple-darwin": {},
+    "aarch64-apple-darwin":      {},
+    "aarch64-unknown-linux-gnu": {},
+    "x86_64-unknown-linux-gnu":  {},
   }.freeze
 
   def target_triple
@@ -29,6 +41,12 @@ class Rune < Formula
 
   def install
     if OS.mac? && Hardware::CPU.arm?
+      bin.install "rune"
+    end
+    if OS.linux? && Hardware::CPU.arm?
+      bin.install "rune"
+    end
+    if OS.linux? && Hardware::CPU.intel?
       bin.install "rune"
     end
 
