@@ -1,8 +1,8 @@
 class Yolobox < Formula
   desc "NixOS VM devbox for AI agents, run by Lima on a Mac"
   homepage "https://github.com/aka-rider/yolobox"
-  url "https://github.com/aka-rider/yolobox/releases/download/v1.0.0/yolobox-1.0.0.tar.gz"
-  sha256 "9d88284c3f37c5461ee9c6178a03ef5654ab98e5fa4b5c9a86265b8efe5da42b"
+  url "https://github.com/aka-rider/yolobox/releases/download/v1.0.1/yolobox-1.0.1.tar.gz"
+  sha256 "10d83e26f1130ab47ee3efd57cef387a3032a1ed2da4294079ebfbd1c78be070"
   license "MIT"
 
   depends_on "fzf"
