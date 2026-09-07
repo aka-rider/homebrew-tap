@@ -7,8 +7,7 @@ cask "vuho" do
   on_macos do
     on_arm do
       sha256 "9e6b434176104467cfbb9fc0b4de9a07aa9075e7c9addcfff0cae150beab35a3"
-      url "https://github.com/aka-rider/vuho/releases/download/v#{version}/Vuho-#{version}-arm64.tar.gz",
-          verified: "github.com/aka-rider/vuho"
+      url "https://github.com/aka-rider/vuho/releases/download/v#{version}/Vuho-#{version}-arm64.tar.gz"
     end
   end
 
@@ -29,19 +28,10 @@ cask "vuho" do
 
   # The release build is ad-hoc signed (no Developer ID), so Gatekeeper would
   # refuse to launch it while the download carries a quarantine xattr.
-  postflight do
-    # system_command raises on a non-zero exit by default, which would
-    # abort the whole install over a step that's a convenience, not a
-    # requirement -- e.g. on a machine where /Applications isn't
-    # user-writable (managed/MDM Macs), xattr can fail even though the
-    # app itself installed fine. Warn instead of failing the install;
-    # Gatekeeper's normal "right-click > Open" bypass still works without
-    # this having run.
-    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{appdir}/Vuho.app"] if OS.mac?
-  rescue => e
-    opoo "Could not remove the quarantine attribute automatically (#{e.message}). " \
-         "macOS may show a Gatekeeper warning on first launch -- right-click Vuho.app and " \
-         "choose Open, or run: xattr -dr com.apple.quarantine \"#{appdir}/Vuho.app\""
+  postflight_steps do
+    run "/usr/bin/xattr",
+        args:         ["-dr", "com.apple.quarantine", "{{appdir}}/Vuho.app"],
+        must_succeed: false
   end
 
   # Settings honour $XDG_CONFIG_HOME; ~/.config/vuho is the default location.
@@ -51,4 +41,10 @@ cask "vuho" do
     "~/.config/vuho",
     "~/Library/Application Support/Vuho",
   ]
+
+  caveats <<~EOS
+    Vuho is ad-hoc signed, so macOS may still refuse the first launch.
+    Right-click Vuho.app and choose Open, or run:
+      xattr -dr com.apple.quarantine "#{appdir}/Vuho.app"
+  EOS
 end

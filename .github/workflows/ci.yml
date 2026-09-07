@@ -40,17 +40,6 @@ jobs:
       - run: brew test whisper-cpp-server
       - run: brew linkage whisper-cpp-server
 
-  rune:
-    runs-on: macos-15
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@main
-
-      - run: brew style Casks/rune-edit.rb
-      - run: brew audit --cask ${{ github.repository_owner }}/tap/rune-edit
-      - run: brew install --cask ${{ github.repository_owner }}/tap/rune-edit
-
   # Covers human edits to Casks/vuho.rb (pushes, PRs, manual runs). It does
   # NOT cover release-vuho.yml's automated bumps: those push with the default
   # GITHUB_TOKEN, which by design never triggers another workflow, so no CI

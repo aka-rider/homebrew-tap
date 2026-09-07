@@ -1,7 +1,7 @@
 # aka-rider/tap
 
 Homebrew tap for [rune](https://github.com/aka-rider/rune), [vuho](https://github.com/aka-rider/vuho),
-[leash](https://github.com/aka-rider/leash), and rune's dictation dependency.
+[yolobox](https://github.com/aka-rider/yolobox), and rune's dictation dependency.
 
 ## Install
 
@@ -25,7 +25,7 @@ brew trust aka-rider/tap
 ### rune — TUI markdown editor
 
 ```sh
-brew install aka-rider/tap/rune-edit
+brew install aka-rider/tap/rune
 rune --version
 ```
 
@@ -42,13 +42,29 @@ Vuho needs Microphone, Accessibility, and Input Monitoring — grant them when m
 Because releases are ad-hoc signed (no Apple Developer ID), each upgrade changes the app's code
 signature and macOS re-prompts for all three permissions again.
 
-### leash — transparent seatbelt sandbox
+### yolobox — isolated dev VM for AI coding agents
 
 ```sh
-brew install aka-rider/tap/leash
+brew install aka-rider/tap/yolobox
 ```
 
-Wraps any command in a macOS seatbelt sandbox; installs the `leash` and `leash-trace` binaries.
+Manages a NixOS VM run by Lima where AI coding agents work with no host mounts, git as the
+only bridge in or out.
+
+Requires 1Password with its SSH agent enabled. `yo` forwards 1Password's SSH agent socket
+into the VM, because the Mac's default `SSH_AUTH_SOCK` is Apple's empty launchd agent and
+without it the VM has no git identity.
+
+```sh
+yo bootstrap
+yo --help
+```
+
+Add this to `~/.ssh/config` so ssh, Zed and VS Code can find the VM:
+
+```
+Include ~/.lima/yolobox/ssh.config
+```
 
 ### whisper-server — dictation backend (optional)
 
@@ -91,11 +107,11 @@ $(brew --prefix)/etc/whisper-cpp-server/config
 
 | Name | Type | Description |
 |------|------|-------------|
-| `rune-edit` | cask | TUI markdown editor (pre-built arm64 binary) |
+| `rune` | formula | TUI markdown editor (pre-built binary; arm64 macOS, arm64/x86_64 Linux) |
 | `vuho` | cask | Local-first, fully private speech-to-text dictation (pre-built arm64 app; downloads its speech model on first run) |
-| `leash` | cask | Transparent macOS seatbelt sandbox for any command (pre-built universal binary) |
+| `yolobox` | formula | NixOS VM devbox for AI agents, run by Lima on a Mac |
 | `whisper-cpp-server` | formula | OpenAI Whisper HTTP server with VAD and Metal acceleration (pre-built arm64 binary) |
 | `whisper-cpp-large-v3-turbo` | formula | Whisper large-v3-turbo GGML model |
 | `whisper-cpp-silero-vad` | formula | Silero VAD GGML model |
 
-All pre-built binaries are Apple Silicon (arm64) only. Intel Macs are not supported.
+All macOS binaries here are Apple Silicon (arm64) only. Intel Macs are not supported.
