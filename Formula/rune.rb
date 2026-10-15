@@ -1,19 +1,19 @@
 class Rune < Formula
   desc "TUI markdown editor that protects your words"
   homepage "https://github.com/aka-rider/rune"
-  version "1.5.0"
+  version "1.5.1"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/aka-rider/rune/releases/download/v1.5.0/rune-cli-aarch64-apple-darwin.tar.xz"
-    sha256 "288b7a5491360ac037ae53c45b14514016d9ee7a249192a2b5a788549658ea99"
+    url "https://github.com/aka-rider/rune/releases/download/v1.5.1/rune-cli-aarch64-apple-darwin.tar.xz"
+    sha256 "d63b488a2dcfce5cd8a8c3da95278c7ce0f0e04b01c232d63ba1c87a6cde8afd"
   end
   if OS.linux?
     if Hardware::CPU.arm?
-      url "https://github.com/aka-rider/rune/releases/download/v1.5.0/rune-cli-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "951aeb1d99c7cac4b19f4ffaca28e1b490ddf35cbe187e0625017e9088998ea9"
+      url "https://github.com/aka-rider/rune/releases/download/v1.5.1/rune-cli-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "cfcd133098fd3d801ec704ae49a68e4f0dcd5d0a28e56232caf46cdd2dec46db"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/aka-rider/rune/releases/download/v1.5.0/rune-cli-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "ec6cb907b69c80c1c7531800a4fc302a746b2c5b41e2f7eecbb6a9bff87a36fd"
+      url "https://github.com/aka-rider/rune/releases/download/v1.5.1/rune-cli-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "23dff945a7dd6c5076112f682fd2ef51223c4f53d149698fb6031ba08b3159ca"
     end
   end
   license "MIT"
