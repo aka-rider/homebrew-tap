@@ -1,8 +1,8 @@
 class Yolobox < Formula
   desc "NixOS VM devbox for AI agents, run by Lima on a Mac"
   homepage "https://github.com/aka-rider/yolobox"
-  url "https://github.com/aka-rider/yolobox/releases/download/v1.9.3/yolobox-1.9.3.tar.gz"
-  sha256 "a41f2eaeba796c0d48fae18a0cf062c1bbd9e82dc7d2a51cccd481673f7a3c17"
+  url "https://github.com/aka-rider/yolobox/releases/download/v2.0.0/yolobox-2.0.0.tar.gz"
+  sha256 "d80d9a0bbf049f721ae0e4f0a717fcdb7c63de7897d360afa9d72ce4bf4e0254"
   license "MIT"
 
   depends_on :macos
@@ -10,7 +10,7 @@ class Yolobox < Formula
   depends_on "lima"
 
   def install
-    libexec.install "yo", "aws-broker"
+    libexec.install "yo", "aws-broker", "facts.json"
     # macOS runs the Lima driver; the libvirt driver's modules and the Linux host
     # files stay out.
     (libexec/"yolobox_cli").install Dir["yolobox_cli/*.py"] - ["yolobox_cli/libvirt.py", "yolobox_cli/libvirt_host.py"]
